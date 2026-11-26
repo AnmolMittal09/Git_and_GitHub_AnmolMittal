@@ -70,6 +70,43 @@ def home():
 def success():
     return render_template("success.html")
 
+# Task 3 - To-Do Application
+
+todo_collection = db["todo_items"]
+
+
+@app.route("/todo")
+def todo():
+    return render_template("todo.html")
+
+
+@app.route("/submittodoitem", methods=["POST"])
+def submit_todo_item():
+
+    item_name = request.form.get("itemName", "").strip()
+    item_description = request.form.get("itemDescription", "").strip()
+
+    if not item_name or not item_description:
+        return jsonify({"error": "All fields are required"}), 400
+
+    item = {
+        "itemName": item_name,
+        "itemDescription": item_description
+    }
+
+    try:
+        todo_collection.insert_one(item)
+
+        return jsonify({
+            "message": "Item added successfully"
+        }), 201
+
+    except Exception:
+        app.logger.exception("To-Do insertion failed")
+
+        return jsonify({
+            "error": "Unable to save item"
+        }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
